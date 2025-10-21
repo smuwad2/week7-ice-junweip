@@ -36,10 +36,46 @@ export default {
     },
     methods: {
         editPost(id) {
-            
+            this.showEditPost = true;
+            const selectedPost = this.posts.find(post => post.id === id);
+            if (selectedPost) {
+                this.entry = selectedPost.entry;
+                this.mood = selectedPost.mood;
+                this.editPostId = selectedPost.id;
+            }
         },
         updatePost(event) {
-            
+        // Prevent form submission from reloading the page
+        event.preventDefault();
+
+        // Create the updated post object
+        const updatedPost = {
+            id: this.editPostId,
+            entry: this.entry,
+            mood: this.mood,
+        };
+
+        // Send the PUT request to the server to update the post
+        axios.post(`${this.baseUrl}/updatePost`, updatedPost)
+            .then(response => {
+                // Find the index of the updated post in the posts array
+                const index = this.posts.findIndex(post => post.id === this.editPostId);
+
+                // If the post exists, update it in the posts array with the response data
+                if (index !== -1) {
+                    this.$set(this.posts, index, response.data); // Use $set to ensure reactivity
+                }
+
+                // Hide the edit form after the post is updated
+                this.showEditPost = false;
+
+                // Optionally, clear the form fields after submission
+                this.entry = '';
+                this.mood = '';
+            })
+            .catch(error => {
+                console.error('Error updating the post:', error);
+            });
         }
     }
 }
@@ -61,7 +97,7 @@ export default {
                     <td>{{ post.id }}</td>
                     <td>{{ post.entry }}</td>
                     <td>{{ post.mood }}</td>
-                    <td><button>Edit</button></td>
+                    <td><button @click=editPost(post.id)>Edit</button></td>
                 </tr>
             </tbody>
 
@@ -70,7 +106,7 @@ export default {
         <div id="editPost" v-if="showEditPost">
             <h3>Edit Post</h3>
             <div id="postContent" class="mx-3">
-                <form>
+                <form @submit =updatePost>
                     <div class="mb-3">
                         <label for="entry" class="form-label">Entry</label>
                         <textarea id="entry" class="form-control" v-model="entry" required></textarea>
@@ -82,7 +118,7 @@ export default {
                             <option v-for="mood in moods" :value="mood">{{ mood }}</option>
                         </select>
                     </div>
-                    <button type="submit" class="btn btn-primary">Update Post</button>
+                    <button type="submit" class="btn btn-primary" >Update Post</button>
                 </form>
             </div>
         </div>
