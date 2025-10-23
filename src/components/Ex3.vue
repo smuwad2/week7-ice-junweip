@@ -1,46 +1,44 @@
 <script>
-import axios from 'axios';
+import axios from 'axios'
 
-    export default { 
-
-       // add code here
-       data () {
+export default {
+    data() {
         return {
             moods: ['Happy', 'Sad', 'Angry'],
-            selectedMood: 'Happy',
+            selMood: '',
             subject: '',
             entry: '',
+            outputMsg: ''
         }
-       }, 
-       computed: {
+    },
+    computed: {
         baseUrl() {
             if (window.location.hostname=='localhost')
                 return 'http://localhost:3000' 
             else {
                 const codespace_host = window.location.hostname.replace('5173', '3000')
                 return `https://${codespace_host}`;
-                }
             }
-        },
-        methods: {
-            addPost() {
-                axios.get(`${this.baseUrl}/addPost`, {
-                    params: {
-                        'subject': this.subject,
-                        'entry': this.entry,
-                        'mood': this.selectedMood,
-                    }
-                }).then(response=> {
-                    this.posts = response.data
-                }).catch(error=> {
-                    this.posts = [{ entry: 'There was an error: ' + error.message }]
-                })
-            }
-
         }
-
+    },
+    methods: {
+        addPost() {
+            axios.get(`${this.baseUrl}/addPost`,{
+                params: {
+                    'subject': this.subject,
+                    'entry': this.entry,
+                    'mood': this.selMood
+                }
+            }).then(response => {
+                this.outputMsg = response.data.message
+            }).catch(error => {
+                console.log(error)
+            })
+        }
     }
+}
 </script>
+
 <template>
     <div class="table m-2">
         <h3>Add a New Blog Post</h3>
@@ -53,15 +51,16 @@ import axios from 'axios';
         <br>
 
         Mood:
-        <!-- TODO: Build a dropdown list here for selecting the mood -->
-        <select v-model="selectedMood">
-            <option v-for="mood in moods">{{ mood }}</option>
+        <select v-model="selMood">
+            <option disabled value="">-- choose mood --</option>
+            <option v-for="m in moods" :key="m" :value="m">{{ m }}</option>
         </select>
 
         <br>
 
         <br>
-        <button @click="addPost()">Submit New Post</button>
+    <button @click="addPost">Submit New Post</button>
+    <div>{{ outputMsg }}</div>
 
         <hr> Click  <a><router-link to="/ViewPosts/">here</router-link></a>  to return to Main Page
        

@@ -9,8 +9,9 @@
             
         },
         methods: {
-            addItems() {
+            addItem(){
                 this.items.push(this.newItem)
+                this.newItem = ''
             }
         }
     }
@@ -21,12 +22,12 @@
     <h2>Shopping Cart</h2>
     <!-- TODO: Add Code Here -->
     <ul>
-        <li v-for="(item, idx) in items" :key="idx">
+        <li v-for="(item, ind) in items">
             {{ item }}
-            <button @click="items.splice(idx, 1)">Delete</button>
+            <button @click="items.splice(ind,1)">Delete!</button>
         </li>
     </ul>
-    <input type="text" v-model="newItem">
-    <button @click="addItems">Add</button>
-
+    <input type="text" v-model="newItem" />
+    <button @click="addItem">Add</button>
+   
 </template>

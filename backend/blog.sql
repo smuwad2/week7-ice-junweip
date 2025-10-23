@@ -1,5 +1,3 @@
-DROP TABLE IF EXISTS post;
-
 create table post (
     id integer primary key,
     create_timestamp datetime,
