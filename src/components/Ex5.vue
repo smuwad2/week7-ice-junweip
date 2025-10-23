@@ -37,6 +37,9 @@
                 ],
                 myHealth: 100,
                 monsterHealth: 100,
+                rounds: 0,
+                princeShake: false,
+                monsterShake: false,
                 statusList: [
                     {
                         class: "text-dark",
@@ -59,10 +62,38 @@
                 }
             }
         },
+        mounted() {
+            // keyboard shortcuts: Space - start, A - attack, S - special, H - heal, G - give up
+            this._keyHandler = (e) => {
+                if (!this.gameStarted && e.code === 'Space') {
+                    this.start();
+                    return;
+                }
+                if (!this.gameStarted) return;
+                const key = e.key.toLowerCase();
+                if (key === 'a') this.attack();
+                if (key === 's') this.specialAttack();
+                if (key === 'h') this.heal();
+                if (key === 'g') this.giveUp();
+            };
+            window.addEventListener('keydown', this._keyHandler);
+        },
+        beforeUnmount() {
+            if (this._keyHandler) window.removeEventListener('keydown', this._keyHandler);
+        },
+
         computed: {
             reversestatusList() {
                 return this.statusList.slice(0).reverse();
             },
+            // buttonSpecialAttack() {
+            //     for (let details of this.buttonDetails) {
+            //         if (details.action == "specialAttack") {
+            //             let buttonSpecialAttack = details;
+            //             return buttonSpecialAttack
+            //         }
+            //     }
+            // }
         },
 
         methods: {
@@ -71,6 +102,7 @@
             },
 
             start() {
+                // console.log("do start");
                 this.gameStarted = true;
                 this.myHealth = 100;
                 this.monsterHealth = 100;
@@ -91,6 +123,9 @@
                     // attack
                     var myDmg = Math.floor(Math.random() * this.MONSTER_MAX_ATTACK);
                     this.myHealth -= myDmg;
+                    // shake player briefly
+                    this.princeShake = true;
+                    setTimeout(() => (this.princeShake = false), 300);
                     this.statusList.push({
                         class: "text-danger",
                         text:
@@ -129,6 +164,10 @@
                 );
                 this.monsterHealth -= monsterDmg;
 
+                // shake monster briefly
+                this.monsterShake = true;
+                setTimeout(() => (this.monsterShake = false), 300);
+
                 var specialTxt = "";
                 if (special) specialTxt = "(special)";
 
@@ -150,6 +189,7 @@
                     });
                     this.gameStarted = false;
                 }
+                this.rounds++;
             },
 
             decrementCooldown() {
@@ -166,6 +206,7 @@
                 this.doAttack(false);
                 if (this.monsterHealth > 0) this.doMonster();
                 this.decrementCooldown();
+                this.rounds++;
             },
 
             specialAttack() {
@@ -174,6 +215,7 @@
 
                 this.specialAttackCoolDown = 2;
                 this.buttonSpecialAttack.show = false;
+                this.rounds++;
             },
 
             heal() {
@@ -189,6 +231,7 @@
 
                 this.doMonster();
                 this.decrementCooldown();
+                this.rounds++;
             },
 
             giveUp() {
@@ -213,7 +256,7 @@
             </div>
             <div class="col-sm-3">
                 <h2>YOU</h2> 
-                <img :src="prince" alt="" class="w-50">
+                <img :src="prince" alt="" class="w-50" :class="{'prince': true, 'shake': princeShake}">
                 <div class="progress my-progress">
                     <div class="progress-bar bg-success" v-bind:style="{ 'width': myHealth +'%'}">
                         {{myHealth}}%
@@ -225,7 +268,7 @@
             </div>
             <div class="col-sm-3">
                 <h2>MONSTER</h2> 
-                <img :src="monster" alt="" class="w-50">
+                <img :src="monster" alt="" class="w-50" :class="{'monster': true, 'shake': monsterShake}">
                 <div class="progress my-progress">
                     <div class="progress-bar bg-success"
                         v-bind:style="{ 'width': monsterHealth +'%'}">
@@ -268,7 +311,10 @@
                 -->
                 <template v-for='details in buttonDetails'>
                     <button v-if='details.show' :class='"btn " + details.btnType'
-                        @click="doAction(details.action)">{{details.value}}</button>
+                        @click="doAction(details.action)" :disabled="details.action==='specialAttack' && specialAttackCoolDown>0">
+                        {{details.value}}
+                    </button>
+                    <span v-if="details.action==='specialAttack' && specialAttackCoolDown>0" class="mx-2">Cooldown: {{specialAttackCoolDown}}</span>
                         &nbsp;
                 </template>
             </div>
@@ -287,6 +333,19 @@
 <style scoped>
     .my-progress {
         height: 25px;
+    }
+    .shake {
+        animation: shake 0.3s;
+    }
+    @keyframes shake {
+        0% { transform: translateX(0); }
+        25% { transform: translateX(-6px); }
+        50% { transform: translateX(6px); }
+        75% { transform: translateX(-4px); }
+        100% { transform: translateX(0); }
+    }
+    img.prince.shake, img.monster.shake {
+        filter: drop-shadow(0 0 8px rgba(255,0,0,0.5));
     }
     
 </style>
