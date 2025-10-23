@@ -28,5 +28,5 @@
     </ul>
     <input type="text" v-model="newItem">
     <button @click="addItems">Add</button>
-   
+
 </template>

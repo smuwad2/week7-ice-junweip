@@ -41,7 +41,6 @@ import axios from 'axios';
 
     }
 </script>
-
 <template>
     <div class="table m-2">
         <h3>Add a New Blog Post</h3>

@@ -60,7 +60,6 @@ export default {
             .then(response => {
                 // Find the index of the updated post in the posts array
                 const index = this.posts.findIndex(post => post.id === this.editPostId);
-
                 // If the post exists, update it in the posts array with the response data
                 if (index !== -1) {
                     this.$set(this.posts, index, response.data); // Use $set to ensure reactivity

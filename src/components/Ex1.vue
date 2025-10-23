@@ -33,7 +33,6 @@
     <p>y <input v-model.number="y"></p>
     
     <p>---------------------</p>
-
     <p>= {{result}}</p>
 </template>
 
